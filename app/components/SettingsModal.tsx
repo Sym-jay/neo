@@ -2,6 +2,10 @@
 
 import React from "react";
 import { X, Server, Cloud } from "lucide-react";
+import Image from "next/image";
+import OpenAILogo from "../../public/OpenAI-white-monoblossom.png"
+import AnthropicClaudeLogo from "../../public/icons8-claude-ai-96.png"
+import GoogleCloudLogo from "../../public/icons8-google-cloud-96.png"
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -32,37 +36,65 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {/* General Settings */}
           <section className="flex flex-col gap-5">
             <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">Cloud Provider</h3>
-              <p className="text-sm font-medium text-muted/80">Select where your inference and RAG are hosted.</p>
+              <h3 className="text-base font-semibold text-foreground mb-1">LLM Inference Provider</h3>
+              <p className="text-sm font-medium text-muted/80">Select where your LLM inference are hosted.</p>
             </div>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <label className="cursor-pointer group">
                 <input type="radio" name="provider" className="peer sr-only" defaultChecked />
                 <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Server size={22} className="mb-2.5 text-foreground/80 peer-checked:text-foreground" />
+                  <Server size={22} className="mb-2.5 w-12.5 h-12.5 text-foreground/80 peer-checked:text-foreground" />
                   <span className="text-sm font-semibold text-foreground/90">Self-Hosted</span>
                 </div>
               </label>
               <label className="cursor-pointer group">
                 <input type="radio" name="provider" className="peer sr-only" />
                 <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Cloud size={22} className="mb-2.5 text-foreground/80 peer-checked:text-foreground" />
-                  <span className="text-sm font-semibold text-foreground/90">AWS / GCP</span>
+                  <Image src={GoogleCloudLogo} className="w-15 h-15" alt="openai-logo"/>
+                  <span className="text-sm font-semibold text-foreground/90">GCP</span>
                 </div>
               </label>
               <label className="cursor-pointer group">
                 <input type="radio" name="provider" className="peer sr-only" />
                 <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <div className="font-bold text-base mb-2.5 h-6 flex items-center tracking-tighter">OAI</div>
+                  <Image src={OpenAILogo} className="w-15 h-15" alt="openai-logo"/>
                   <span className="text-sm font-semibold text-foreground/90">OpenAI</span>
                 </div>
               </label>
               <label className="cursor-pointer group">
                 <input type="radio" name="provider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <div className="font-bold text-base mb-2.5 h-6 flex items-center tracking-tight">ANTH</div>
+                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 
+                peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                  <Image src={AnthropicClaudeLogo} className="w-15 h-15" alt="openai-logo"/>
                   <span className="text-sm font-semibold text-foreground/90">Anthropic</span>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <hr className="border-panel-border/40" />
+
+          {/* RAG Infra Provider */}
+          <section className="flex flex-col gap-5">
+            <div>
+              <h3 className="text-base font-semibold text-foreground mb-1">RAG Infra Provider</h3>
+              <p className="text-sm font-medium text-muted/80">Select where your RAG infrastructure is hosted.</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <label className="cursor-pointer group">
+                <input type="radio" name="ragProvider" className="peer sr-only" defaultChecked />
+                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                  <Server size={22} className="mb-2.5 w-12.5 h-12.5 text-foreground/80 peer-checked:text-foreground" />
+                  <span className="text-sm font-semibold text-foreground/90">Self-hosted</span>
+                </div>
+              </label>
+              <label className="cursor-pointer group">
+                <input type="radio" name="ragProvider" className="peer sr-only" />
+                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                  <Image src={GoogleCloudLogo} className="w-15 h-15" alt="openai-logo"/>
+                  <span className="text-sm font-semibold text-foreground/90">GCP</span>
                 </div>
               </label>
             </div>
