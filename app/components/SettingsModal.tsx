@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { X, Server, Cloud } from "lucide-react";
+import { X, Server } from "lucide-react";
 import Image from "next/image";
 import OpenAILogo from "../../public/OpenAI-white-monoblossom.png"
 import AnthropicClaudeLogo from "../../public/icons8-claude-ai-96.png"
