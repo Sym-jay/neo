@@ -30,7 +30,7 @@ export default function InputArea({ message, setMessage }: InputAreaProps) {
   };
 
   return (
-    <div className="w-full pb-6 pt-2 px-4 sm:px-0 z-10">
+    <div className="w-full pb-8 pt-2 px-4 sm:px-0 z-10">
       <div className="max-w-3xl mx-auto relative">
         <div className="relative flex flex-col w-full border border-panel-border bg-panel/40 backdrop-blur-2xl shadow-xl rounded-3xl overflow-hidden focus-within:border-muted/50 focus-within:ring-4 focus-within:ring-accent/20 transition-all duration-300">
           <textarea
@@ -39,7 +39,7 @@ export default function InputArea({ message, setMessage }: InputAreaProps) {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your prompt here"
-            className="w-full max-h-48 min-h-[60px] bg-transparent border-none text-foreground text-sm p-4 pt-4 pb-12 resize-none focus:outline-none focus:ring-0"
+            className="w-full max-h-48 min-h-[60px] bg-transparent border-none text-foreground text-sm p-4 pt-4 pb-15 resize-none focus:outline-none focus:ring-0"
             rows={1}
           />
           

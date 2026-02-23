@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Neo RAG | Chat",
+  title: "Neo | Chat",
   description: "Self-hosted RAG and LLM Chat Interface",
 };
 

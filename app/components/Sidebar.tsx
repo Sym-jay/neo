@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+
 import { Plus, Settings, User } from "lucide-react";
 
 interface SidebarProps {
@@ -8,8 +8,11 @@ interface SidebarProps {
   onOpenSettings: () => void;
 }
 
+
 export default function Sidebar({ isOpen, onOpenSettings }: SidebarProps) {
+
   return (
+    <>
     <div 
       className={`flex flex-col bg-panel/40 backdrop-blur-2xl border border-panel-border rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] my-3 ml-3 relative z-20 ${
         isOpen ? "w-[260px] opacity-100 translate-x-0" : "w-0 opacity-0 -translate-x-10 !ml-0 !border-transparent"
@@ -50,12 +53,14 @@ export default function Sidebar({ isOpen, onOpenSettings }: SidebarProps) {
             <Settings size={16} />
             <span>Settings</span>
           </button>
-          <button className="flex items-center gap-2 w-full p-2.5 rounded-xl hover:bg-accent/80 transition-all text-sm text-foreground border border-transparent hover:border-panel-border hover:shadow-sm">
+          <button
+           className="flex items-center gap-2 w-full p-2.5 rounded-xl hover:bg-accent/80 transition-all text-sm text-foreground border border-transparent hover:border-panel-border hover:shadow-sm">
             <User size={16} />
             <span>Sign In</span>
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }

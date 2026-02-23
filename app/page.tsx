@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Menu, ChevronDown, Check, Settings } from "lucide-react";
+import { Menu, ChevronDown, Check, Settings, LogIn } from "lucide-react";
 
 import Sidebar from "./components/Sidebar";
 import InputArea from "./components/InputArea";
@@ -93,7 +93,7 @@ export default function Home() {
               </div>
             )}
           </div>
-          <div className="w-9" /> {/* Spacer for flex balance */}
+          <div className="w-9"></div>
         </header>
 
         {/* Chat Interface Layer */}
@@ -105,6 +105,7 @@ export default function Home() {
 
       {/* Configuration Modal */}
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
     </div>
   );
 }
