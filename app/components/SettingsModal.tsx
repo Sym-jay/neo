@@ -31,186 +31,188 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
         
         {/* Modal Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col gap-10 no-scrollbar">
-          {/* General Settings */}
-          <section className="flex flex-col gap-5">
+        <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col gap-8 no-scrollbar">
+          
+          {/* Infrastructure Selection */}
+          <section className="flex flex-col gap-6">
             <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">LLM Inference Provider</h3>
-              <p className="text-sm font-medium text-muted/80">Select where your LLM inference are hosted.</p>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Infrastructure Providers</h3>
+              <p className="text-sm font-medium text-muted/80">Select where your services are hosted.</p>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <label className="cursor-pointer group">
-                <input type="radio" name="llmProvider" className="peer sr-only" defaultChecked />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Server className="w-9 h-9 text-foreground/80 peer-checked:text-foreground" />
-                  <span className="text-sm font-semibold text-foreground/90">Self-Hosted</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-background/20 p-5 rounded-2xl border border-panel-border/40">
+              
+              {/* LLM Inference Provider */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-sm font-semibold text-foreground/90">LLM Inference</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="llmProvider" className="peer sr-only" defaultChecked />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Server className="w-4 h-4 text-foreground/80 peer-checked:text-foreground shrink-0" />
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Self-Hosted</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="llmProvider" className="peer sr-only" />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={GoogleCloudLogo} className="w-4 h-4 object-contain shrink-0" alt="GCP Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">GCP</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="llmProvider" className="peer sr-only" />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={OpenAILogo} className="w-4 h-4 object-contain shrink-0" alt="OpenAI Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">OpenAI</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="llmProvider" className="peer sr-only" />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={AnthropicClaudeLogo} className="w-4 h-4 object-contain shrink-0" alt="Anthropic Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Anthropic</span>
+                    </div>
+                  </label>
                 </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="llmProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={GoogleCloudLogo} className="w-10 h-10 object-contain" alt="GCP Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">GCP</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="llmProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={OpenAILogo} className="w-9 h-9 object-contain" alt="OpenAI Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">OpenAI</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="llmProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={AnthropicClaudeLogo} className="w-10 h-10 object-contain" alt="Anthropic Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">Anthropic</span>
-                </div>
-              </label>
-            </div>
-          </section>
+              </div>
 
-          <section className="flex flex-col gap-5">
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">Storage Bucket</h3>
-              <p className="text-sm font-medium text-muted/80">Select where your storage bucket is hosted.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <label className="cursor-pointer group">
-                <input type="radio" name="storageProvider" className="peer sr-only" defaultChecked />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Server className="w-9 h-9 text-foreground/80 peer-checked:text-foreground" />
-                  <span className="text-sm font-semibold text-foreground/90">Self-Hosted</span>
+              {/* RAG Infra Provider */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-sm font-semibold text-foreground/90">RAG Engine</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="ragInfraProvider" className="peer sr-only" defaultChecked />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Server className="w-4 h-4 text-foreground/80 peer-checked:text-foreground shrink-0" />
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Self-Hosted</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="ragInfraProvider" className="peer sr-only" />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={GoogleCloudLogo} className="w-4 h-4 object-contain shrink-0" alt="GCP Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">GCP</span>
+                    </div>
+                  </label>
                 </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="storageProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={SupabaseLogo} className="w-9 h-9 object-contain" alt="Supabase Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">Supabase</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="storageProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={GoogleCloudLogo} className="w-10 h-10 object-contain" alt="GCP Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">GCP</span>
-                </div>
-              </label>
-            </div>
-          </section>
+              </div>
 
-          <section className="flex flex-col gap-5">
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">Vector DB</h3>
-              <p className="text-sm font-medium text-muted/80">Select where your vector database is hosted.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <label className="cursor-pointer group">
-                <input type="radio" name="vectorDbProvider" className="peer sr-only" defaultChecked />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Server className="w-9 h-9 text-foreground/80 peer-checked:text-foreground" />
-                  <span className="text-sm font-semibold text-foreground/90">Self-Hosted</span>
+              {/* Storage Bucket */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-sm font-semibold text-foreground/90">Storage Bucket</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="storageProvider" className="peer sr-only" defaultChecked />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Server className="w-4 h-4 text-foreground/80 peer-checked:text-foreground shrink-0" />
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Self-Hosted</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="storageProvider" className="peer sr-only" />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={SupabaseLogo} className="w-4 h-4 object-contain shrink-0" alt="Supabase Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Supabase</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group col-span-2">
+                    <input type="radio" name="storageProvider" className="peer sr-only" />
+                    <div className="flex items-center justify-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={GoogleCloudLogo} className="w-4 h-4 object-contain shrink-0" alt="GCP Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Google Cloud Platform</span>
+                    </div>
+                  </label>
                 </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="vectorDbProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={SupabaseLogo} className="w-9 h-9 object-contain" alt="Supabase Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">Supabase</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="vectorDbProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={GoogleCloudLogo} className="w-10 h-10 object-contain" alt="GCP Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">GCP</span>
-                </div>
-              </label>
-            </div>
-          </section>
+              </div>
 
-          <section className="flex flex-col gap-5">
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">RAG Infra Provider</h3>
-              <p className="text-sm font-medium text-muted/80">Select where your RAG infrastructure is hosted.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <label className="cursor-pointer group">
-                <input type="radio" name="ragInfraProvider" className="peer sr-only" defaultChecked />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Server className="w-9 h-9 text-foreground/80 peer-checked:text-foreground" />
-                  <span className="text-sm font-semibold text-foreground/90">Self-Hosted</span>
+              {/* Vector DB */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-sm font-semibold text-foreground/90">Vector Database</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="vectorDbProvider" className="peer sr-only" defaultChecked />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Server className="w-4 h-4 text-foreground/80 peer-checked:text-foreground shrink-0" />
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Self-Hosted</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group">
+                    <input type="radio" name="vectorDbProvider" className="peer sr-only" />
+                    <div className="flex items-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={SupabaseLogo} className="w-4 h-4 object-contain shrink-0" alt="Supabase Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Supabase</span>
+                    </div>
+                  </label>
+                  <label className="cursor-pointer group col-span-2">
+                    <input type="radio" name="vectorDbProvider" className="peer sr-only" />
+                    <div className="flex items-center justify-center p-3 gap-2.5 rounded-xl border border-panel-border bg-background/50 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
+                      <Image src={GoogleCloudLogo} className="w-4 h-4 object-contain shrink-0" alt="GCP Logo"/>
+                      <span className="text-xs font-semibold text-foreground/90 truncate">Google Cloud Platform</span>
+                    </div>
+                  </label>
                 </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input type="radio" name="ragInfraProvider" className="peer sr-only" />
-                <div className="flex flex-col items-center justify-center p-4 h-[110px] gap-3 rounded-2xl border border-panel-border bg-background/30 peer-checked:border-primary/80 peer-checked:bg-accent/60 group-hover:bg-accent/40 transition-all shadow-sm">
-                  <Image src={GoogleCloudLogo} className="w-10 h-10 object-contain" alt="GCP Logo"/>
-                  <span className="text-sm font-semibold text-foreground/90">GCP</span>
-                </div>
-              </label>
+              </div>
+
             </div>
           </section>
 
           <hr className="border-panel-border/40" />
 
-          {/* Infrastructure Configuration */}
-          <section className="flex flex-col gap-5">
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">Instance Configuration</h3>
-              <p className="text-sm font-medium text-muted/80">Configure your exposed instance URL for RAG and LLM backend.</p>
+          {/* Configuration Settings */}
+          <section className="flex flex-col md:flex-row gap-8">
+            <div className="flex-1 flex flex-col gap-5">
+              <div>
+                <h3 className="text-base font-semibold text-foreground mb-1">Instance Configuration</h3>
+                <p className="text-xs font-medium text-muted/80 leading-relaxed">For Self-Hosted RAG and LLM connection.</p>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-foreground/60 tracking-wider uppercase">API Endpoint URL</label>
+                  <input 
+                    type="url" 
+                    placeholder="https://your-ec2-instance..."
+                    className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-foreground/60 tracking-wider uppercase">Auth Token (Optional)</label>
+                  <input 
+                    type="password" 
+                    placeholder="sk-..."
+                    className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground/70 tracking-wide uppercase">API Endpoint URL</label>
-                <input 
-                  type="url" 
-                  placeholder="https://your-ec2-instance-ip.compute.amazonaws.com"
-                  className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-3 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground/70 tracking-wide uppercase">API Auth Token (Optional)</label>
-                <input 
-                  type="password" 
-                  placeholder="sk-..."
-                  className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-3 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
-                />
-              </div>
-            </div>
-          </section>
+            <div className="hidden md:block w-px bg-panel-border/40" />
+            <hr className="md:hidden border-panel-border/40" />
 
-          <hr className="border-panel-border/40" />
-
-          {/* External Provider Keys */}
-          <section className="flex flex-col gap-5">
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">External Provider API Keys</h3>
-              <p className="text-sm font-medium text-muted/80">Keys are stored locally in your browser.</p>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground/70 tracking-wide uppercase">OpenAI API Key</label>
-                <input 
-                  type="password" 
-                  placeholder="sk-proj-..."
-                  className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-3 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
-                />
+            <div className="flex-1 flex flex-col gap-5">
+              <div>
+                <h3 className="text-base font-semibold text-foreground mb-1">Provider API Keys</h3>
+                <p className="text-xs font-medium text-muted/80 leading-relaxed">Keys are stored locally in your browser.</p>
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground/70 tracking-wide uppercase">Anthropic API Key</label>
-                <input 
-                  type="password" 
-                  placeholder="sk-ant-..."
-                  className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-3 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
-                />
+
+              <div className="flex flex-col gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-foreground/60 tracking-wider uppercase">OpenAI API Key</label>
+                  <input 
+                    type="password" 
+                    placeholder="sk-proj-..."
+                    className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-foreground/60 tracking-wider uppercase">Anthropic API Key</label>
+                  <input 
+                    type="password" 
+                    placeholder="sk-ant-..."
+                    className="w-full bg-background/30 border border-panel-border rounded-xl px-4 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:border-muted focus:ring-4 focus:ring-accent/20 transition-all placeholder:text-muted/40 shadow-inner"
+                  />
+                </div>
               </div>
             </div>
           </section>
