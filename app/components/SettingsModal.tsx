@@ -21,7 +21,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         className="bg-panel/80 backdrop-blur-2xl border border-panel-border/60 rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.4)] w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col ring-1 ring-white/5 animate-in slide-in-from-bottom-8 duration-300 ease-out"
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-panel-border/40">
-          <h2 className="text-xl font-semibold text-foreground tracking-tight">Settings</h2>
+          <h2 className="text-xl font-semibold text-foreground tracking-tight">Configure</h2>
           <button 
             onClick={onClose}
             className="p-2 text-muted hover:text-foreground hover:bg-accent/80 rounded-xl transition-colors"
@@ -70,8 +70,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </label>
             </div>
           </section>
-
-          <hr className="border-panel-border/40" />
 
           <section className="flex flex-col gap-5">
             <div>

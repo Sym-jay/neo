@@ -32,43 +32,46 @@ export default function InputArea({ message, setMessage }: InputAreaProps) {
   return (
     <div className="w-full pb-8 pt-2 px-4 sm:px-0 z-10">
       <div className="max-w-3xl mx-auto relative">
-        <div className="relative flex flex-col w-full border border-panel-border bg-panel/40 backdrop-blur-2xl shadow-xl rounded-3xl overflow-hidden focus-within:border-muted/50 focus-within:ring-4 focus-within:ring-accent/20 transition-all duration-300">
+        {/* Liquid Glass Apple-inspired Inline Navbar/Island */}
+        <div className="relative flex items-end w-full border border-panel-border/80 bg-panel/50 backdrop-blur-2xl shadow-2xl rounded-[32px] p-1.5 focus-within:border-muted/60 focus-within:ring-4 focus-within:ring-accent/20 transition-all duration-300">
+          
+          <div className="flex items-center gap-1 mb-0.5 ml-1">
+            <button 
+              className="p-2.5 text-muted hover:text-foreground hover:bg-foreground/5 rounded-full transition-all duration-200"
+              title="Attach files"
+            >
+              <Paperclip size={20} />
+            </button>
+            <button 
+              className="p-2.5 text-muted hover:text-foreground hover:bg-foreground/5 rounded-full transition-all duration-200"
+              title="Open folder"
+            >
+              <FolderOpen size={20} />
+            </button>
+          </div>
+          
           <textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your prompt here"
-            className="w-full max-h-48 min-h-[60px] bg-transparent border-none text-foreground text-sm p-4 pt-4 pb-15 resize-none focus:outline-none focus:ring-0"
+            placeholder="Type your prompt here..."
+            className="flex-1 max-h-48 min-h-[44px] bg-transparent border-none text-foreground text-[15px] px-3 py-3 mx-1 resize-none focus:outline-none focus:ring-0 leading-relaxed"
             rows={1}
           />
           
-          {/* Bottom Actions of Input Box */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+          <div className="mb-0.5 mr-1">
             <button 
-              className="p-1.5 text-muted hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-              title="Attach files"
+              className={`p-2.5 rounded-full transition-all duration-300 flex items-center justify-center ${
+                message.trim().length > 0 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/30 scale-100" 
+                  : "bg-foreground/5 text-muted/50 cursor-not-allowed scale-95"
+              }`}
+              disabled={message.trim().length === 0}
             >
-              <Paperclip size={18} />
-            </button>
-            <button 
-              className="p-1.5 text-muted hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-              title="Open folder"
-            >
-              <FolderOpen size={18} />
+              <ArrowUp size={20} strokeWidth={2.5} />
             </button>
           </div>
-          
-          <button 
-            className={`absolute bottom-3 right-3 p-1.5 rounded-xl transition-all duration-200 flex items-center justify-center ${
-              message.trim().length > 0 
-                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 scale-100" 
-                : "bg-accent/80 text-muted cursor-not-allowed scale-95"
-            }`}
-            disabled={message.trim().length === 0}
-          >
-            <ArrowUp size={18} />
-          </button>
         </div>
       </div>
     </div>

@@ -51,12 +51,7 @@ export default function Sidebar({ isOpen, onOpenSettings }: SidebarProps) {
             className="flex items-center gap-2 w-full p-2.5 rounded-xl hover:bg-accent/80 transition-all text-sm text-foreground border border-transparent hover:border-panel-border hover:shadow-sm"
           >
             <Settings size={16} />
-            <span>Settings</span>
-          </button>
-          <button
-           className="flex items-center gap-2 w-full p-2.5 rounded-xl hover:bg-accent/80 transition-all text-sm text-foreground border border-transparent hover:border-panel-border hover:shadow-sm">
-            <User size={16} />
-            <span>Sign In</span>
+            <span>Configure</span>
           </button>
         </div>
       </div>
