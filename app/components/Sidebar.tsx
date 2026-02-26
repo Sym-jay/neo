@@ -1,7 +1,7 @@
 "use client";
 
 
-import { Plus, Settings, User } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,25 +24,6 @@ export default function Sidebar({ isOpen, onOpenSettings }: SidebarProps) {
           <Plus size={16} />
           <span>New Chat</span>
         </button>
-
-        {/* Chat History Placeholder */}
-        {/*<div className="flex-1 overflow-y-auto mt-4 px-2 no-scrollbar">
-          <div className="text-xs font-semibold text-muted mb-3 px-1">Today</div>
-          <button className="flex items-center w-full p-2 rounded-lg hover:bg-accent/60 transition-colors text-sm text-foreground/80 truncate mb-1">
-            Building a RAG System
-          </button>
-          <button className="flex items-center w-full p-2 rounded-lg hover:bg-accent/60 transition-colors text-sm text-foreground/80 truncate mb-1">
-            AWS EC2 Instance Setup
-          </button>
-          
-          <div className="text-xs font-semibold text-muted mb-3 px-1 mt-6">Previous 7 Days</div>
-          <button className="flex items-center w-full p-2 rounded-lg hover:bg-accent/60 transition-colors text-sm text-foreground/80 truncate mb-1">
-            Dockerizing LLMs
-          </button>
-          <button className="flex items-center w-full p-2 rounded-lg hover:bg-accent/60 transition-colors text-sm text-foreground/80 truncate mb-1">
-            Anthropic API Integration
-          </button>
-        </div>*/}
 
         {/* Bottom Actions */}
         <div className="mt-auto pt-2 border-t border-panel-border/50 flex flex-col gap-1">

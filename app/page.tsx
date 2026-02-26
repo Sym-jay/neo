@@ -1,23 +1,48 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Menu, ChevronDown, Check, Settings, LogIn } from "lucide-react";
+import { Menu, ChevronDown, Check, Settings } from "lucide-react";
 
 import Sidebar from "./components/Sidebar";
 import InputArea from "./components/InputArea";
 import SettingsModal from "./components/SettingsModal";
 import ChatArea from "./components/ChatArea";
+import ModelSelectionModal from "@/backend/ModelSelectionModal";
 
 export default function Home() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [message, setMessage] = useState("");
 
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("GPT-4o");
+  const [selectedModel, setSelectedModel] = useState("Loading...");
+  const [models, setModels] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const models = ["GPT-4o", "Claude 3.5 Sonnet", "Gemini 1.5 Pro", "Llama 3 70B"];
+  const fetchModels = React.useCallback(async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/models');
+      const data = await res.json();
+      setModels(data.models || []);
+      if (data.current_model) {
+        setSelectedModel(data.current_model);
+      } else if (data.models && data.models.length > 0) {
+        setSelectedModel(data.models[0]);
+      } else {
+        setSelectedModel("No models");
+      }
+    } catch (err) {
+      console.error("Failed to fetch models:", err);
+      setSelectedModel("Error loading models");
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchModels();
+  }, [fetchModels]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -67,9 +92,25 @@ export default function Home() {
                 {models.map((model) => (
                   <button
                     key={model}
-                    onClick={() => {
-                      setSelectedModel(model);
+                    onClick={async () => {
+                      setSelectedModel("Loading...");
                       setIsModelDropdownOpen(false);
+                      try {
+                        const res = await fetch("http://localhost:8000/api/models/load", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ model_name: model }),
+                        });
+                        const data = await res.json();
+                        if (data.status === "success") {
+                          setSelectedModel(model);
+                        } else {
+                          setSelectedModel("Error");
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        setSelectedModel("Error");
+                      }
                     }}
                     className="w-full text-left px-4 py-2 text-sm hover:bg-accent/10 flex items-center justify-between group transition-colors"
                   >
@@ -83,7 +124,7 @@ export default function Home() {
                 <button 
                   onClick={() => {
                     setIsModelDropdownOpen(false);
-                    setIsSettingsOpen(true);
+                    setIsModelSelectionOpen(true);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-muted hover:text-foreground hover:bg-accent/10 flex items-center gap-2 transition-colors"
                 >
@@ -105,6 +146,14 @@ export default function Home() {
 
       {/* Configuration Modal */}
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
+      <ModelSelectionModal 
+        isOpen={isModelSelectionOpen} 
+        onClose={() => {
+          setIsModelSelectionOpen(false);
+          fetchModels(); // Refresh models after closing
+        }} 
+      />
 
     </div>
   );
