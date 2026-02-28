@@ -7,7 +7,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this in production to match your Next.js domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,7 +33,8 @@ async def root():
 @app.get("/api/models")
 async def get_models():
     models = inference.get_available_models()
-    return {"models": models, "current_model": inference.llm_name}
+    categorized = inference.get_categorized_models()
+    return {"models": models, "categorized_models": categorized, "current_model": inference.llm_name}
 
 @app.get("/api/trending-models")
 async def get_popular_models():
@@ -106,6 +107,14 @@ async def load_model(request: LoadModelRequest):
             return {"status": "success", "message": f"Model {request.model_name} loaded and ready."}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+@app.post("/api/models/unload")
+async def unload_model():
+    try:
+        inference.unload_model()
+        return {"status": "success", "message": "Model unloaded successfully."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.post("/api/generate", response_model=QueryResponse)
 async def generate_response(request: QueryRequest):

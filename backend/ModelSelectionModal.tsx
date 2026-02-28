@@ -13,6 +13,7 @@ export default function ModelSelectionModal({
   onClose: () => void 
 }) {
   const [models, setModels] = useState<string[]>([]);
+  const [categorizedModels, setCategorizedModels] = useState<Record<string, string[]>>({});
   const [popularModels, setPopularModels] = useState<string[]>([]);
   const [currentModel, setCurrentModel] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
@@ -51,6 +52,7 @@ export default function ModelSelectionModal({
       const trendingData = await trendingRes.json();
       
       setModels(modelsData.models || []);
+      setCategorizedModels(modelsData.categorized_models || {});
       setCurrentModel(modelsData.current_model || '');
       setPopularModels(trendingData.popular || []);
     } catch {
@@ -93,6 +95,30 @@ export default function ModelSelectionModal({
 
   const loadSpecificModel = async (modelToLoad: string) => {
     if (!modelToLoad) return;
+    
+    // If the model is already the active model, unload it
+    if (currentModel === modelToLoad) {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`${API_BASE_URL}/api/models/unload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (data.status === 'error') {
+          throw new Error(data.message);
+        }
+        setCurrentModel('');
+        await fetchModels();
+        return;
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to unload model.';
+        setError(errorMessage);
+        setLoading(false);
+        return;
+      }
+    }
     
     setSelectedModel(modelToLoad);
     setPullProgress(null);
@@ -179,6 +205,16 @@ export default function ModelSelectionModal({
     }
   };
 
+  const getCategoryForModel = (modelName: string) => {
+    if (!modelName) return null;
+    for (const [category, modelsList] of Object.entries(categorizedModels)) {
+      if (modelsList.includes(modelName)) return category;
+    }
+    return 'LLM'; // default fallback
+  };
+
+  const currentCategory = getCategoryForModel(currentModel);
+
   if (!isOpen) return null;
 
   return (
@@ -248,30 +284,40 @@ export default function ModelSelectionModal({
             </div>
           )}
 
-          {/* Current Model & Pull */}
+          {/* Mounted Models */}
           <section className="flex flex-col gap-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">Active Model</h3>
-              <p className="text-sm font-medium text-muted/80">The model currently loaded in memory.</p>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Mounted Models</h3>
+              <p className="text-sm font-medium text-muted/80">Models currently loaded in memory for different tasks.</p>
             </div>
             
-            <div className="flex items-center p-4 gap-4 rounded-2xl border border-panel-border/60 bg-background/30 shadow-sm">
-              <div className="p-3 bg-primary/20 text-primary rounded-xl">
-                <Cpu size={24} />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-foreground/90">
-                  {currentModel || 'No model loaded'}
-                </h4>
-                <p className="text-xs font-medium text-muted/70 mt-0.5">
-                  {currentModel ? 'Ready for inference' : 'Select a model below to load it.'}
-                </p>
-              </div>
-              {currentModel && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">
-                  Active
+            <div className="flex flex-col gap-3">
+              {[
+                { type: "LLM", model: currentCategory === "LLM" ? currentModel : null, icon: <Cpu size={20} /> },
+                { type: "OCR model", model: currentCategory === "OCR model" ? currentModel : null, icon: <Cpu size={20} /> },
+                { type: "Audio", model: currentCategory === "Audio" ? currentModel : null, icon: <Cpu size={20} /> },
+                { type: "Embedding model", model: currentCategory === "Embedding model" ? currentModel : null, icon: <Cpu size={20} /> },
+                { type: "Other", model: currentCategory === "Other" ? currentModel : null, icon: <Cpu size={20} /> }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center p-3 gap-4 rounded-xl border border-panel-border/60 bg-background/30 shadow-sm">
+                  <div className="p-2.5 bg-primary/10 text-primary rounded-lg">
+                    {item.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs font-bold text-muted uppercase tracking-wider">{item.type}</span>
+                    </div>
+                    <h4 className="text-sm font-semibold text-foreground/90">
+                      {item.model || 'No model loaded'}
+                    </h4>
+                  </div>
+                  {item.model && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase">
+                      Active
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
           </section>
 
@@ -414,8 +460,16 @@ export default function ModelSelectionModal({
                       ) : (
                         <div className="flex items-center gap-2">
                           {currentModel === model ? (
-                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wide">
-                              Active
+                            <div 
+                              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wide cursor-pointer hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 group/active"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                loadSpecificModel(model);
+                              }}
+                              title="Click to unload"
+                            >
+                              <span className="group-hover/active:hidden">Active</span>
+                              <span className="hidden group-hover/active:inline">Unload</span>
                             </div>
                           ) : (
                             <span className="text-xs text-muted/50 font-semibold opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap cursor-pointer" onClick={() => loadSpecificModel(model)}>
