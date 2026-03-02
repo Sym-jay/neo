@@ -18,6 +18,7 @@ export default function Sidebar({ isOpen, onOpenSettings }: SidebarProps) {
         isOpen ? "w-[260px] opacity-100 translate-x-0" : "w-0 opacity-0 -translate-x-10 !ml-0 !border-transparent"
       } overflow-hidden shrink-0 shadow-2xl`}
     >
+      <h1 className="px-5 py-5 font-mono text-2xl">Neo Chat</h1>
       <div className="flex flex-col h-full p-3 gap-2 w-[260px]">
         {/* New Chat Button */}
         <button className="flex items-center gap-2 w-full p-2.5 rounded-xl hover:bg-accent/80 transition-all text-sm font-medium border border-transparent hover:border-panel-border text-foreground hover:shadow-sm">

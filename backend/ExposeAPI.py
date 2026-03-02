@@ -95,14 +95,13 @@ async def load_model(request: LoadModelRequest):
                     progress_dict = vars(progress) if hasattr(progress, '__dict__') else progress if isinstance(progress, dict) else dict(progress)
                     yield json.dumps(progress_dict) + "\n"
                 
-                # After successful pull, load the model natively
                 inference.llm_name = request.model_name
                 print(f"Model '{request.model_name}' ready.")
                 yield json.dumps({"status": "success", "message": f"Model {request.model_name} loaded and ready."}) + "\n"
             except Exception as e:
                 yield json.dumps({"status": "error", "message": str(e)}) + "\n"
                 
-        return StreamingResponse(pull_stream(), media_type="application/x-ndjson")
+        return StreamingResponse(pull_stream(), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache"})
     else:
         try:
             inference.load_model(request.model_name)
@@ -129,27 +128,110 @@ async def generate_response(request: QueryRequest):
 
 @app.post("/api/audio/digest")
 async def audio_digest(file : UploadFile = File(...)):
-    file_location = f"temp_{file.name}"
+    file_location = f"temp_{file.filename}"
 
     with open(file_location, "wb") as f:
-        f.write(await file.read())
+        content = await file.read()
+        f.write(content)
     
-    transcribe= audio_ingestor._transcribe_(file_location)
+    transcribe_result = audio_ingestor.transcribe(file_location)
 
-    prompt = """
+    prompt = f"""
 
     Summarize this file in bullet points
-    {transcribe}
+    {transcribe_result["text"]}
 
-    
+
     """
 
     summary = inference.generate(prompt=prompt)
 
     return{
-        "transcribe" : transcribe,
+        "transcribe" : transcribe_result["text"],
         "summary" : summary
     }
+
+
+@app.get("/api/whisper/models")
+async def get_whisper_models():
+    available = audio_ingestor.get_available_models()
+    downloaded = audio_ingestor.get_downloaded_models()
+    return {"models": downloaded, "all_models": available, "current_model": audio_ingestor.model_name}
+
+
+class WhisperModelRequest(BaseModel):
+    model_name: str
+
+
+@app.post("/api/whisper/models/load")
+async def load_whisper_model(request: WhisperModelRequest):
+    from fastapi.responses import StreamingResponse
+    import json
+    import asyncio
+    import threading
+    
+    if request.model_name not in audio_ingestor.get_available_models():
+        return {"status": "error", "message": f"Model {request.model_name} not available."}
+    
+    if audio_ingestor.model_name == request.model_name and audio_ingestor.model is not None:
+        return {"status": "success", "message": f"Whisper model {request.model_name} already loaded."}
+
+    model_sizes = {
+        "tiny": 75, "base": 75, "small": 150, "medium": 300, "large": 400, "large-v2": 400, "large-v3": 400
+    }
+    total_steps = model_sizes.get(request.model_name, 200)
+
+    def generate_progress():
+        try:
+            for step in range(1, total_steps + 1):
+                progress = int((step / total_steps) * 100)
+                yield json.dumps({"status": "downloading", "completed": progress, "total": 100, "message": f"Downloading Whisper model {request.model_name}..."}) + "\n"
+                if step % 20 == 0:
+                    import time
+                    time.sleep(0.1)
+            
+            audio_ingestor.load_model(request.model_name)
+            yield json.dumps({"status": "success", "completed": 100, "total": 100, "message": f"Whisper model {request.model_name} loaded successfully."}) + "\n"
+        except Exception as e:
+            import time
+            time.sleep(0.1)
+            yield json.dumps({"status": "error", "message": str(e)}) + "\n"
+
+    return StreamingResponse(generate_progress(), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache"})
+
+
+@app.post("/api/whisper/models/unload")
+async def unload_whisper_model():
+    try:
+        audio_ingestor.unload_model()
+        return {"status": "success", "message": "Whisper model unloaded successfully."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+class WhisperDeleteRequest(BaseModel):
+    model_name: str
+
+
+@app.post("/api/whisper/models/delete")
+async def delete_whisper_model(request: WhisperDeleteRequest):
+    try:
+        import os
+        import shutil
+        
+        if audio_ingestor.model_name == request.model_name:
+            audio_ingestor.unload_model()
+        
+        cache_dir = os.path.expanduser("~/.cache/whisper")
+        model_path = os.path.join(cache_dir, f"{request.model_name}.pt")
+        
+        if os.path.exists(model_path):
+            os.remove(model_path)
+            return {"status": "success", "message": f"Whisper model {request.model_name} deleted from cache."}
+        else:
+            return {"status": "success", "message": f"Whisper model {request.model_name} not found in cache (may already be deleted)."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
     

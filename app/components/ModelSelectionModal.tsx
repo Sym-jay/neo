@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Cpu, DownloadCloud, Database, RefreshCcw, TrendingUp, Trash2 } from "lucide-react";
+import { X, Cpu, DownloadCloud, Database, RefreshCcw, TrendingUp, Trash2, Mic } from "lucide-react";
 
 const API_BASE_URL = 'http://localhost:8000';
+
+const WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v2", "large-v3"];
 
 export default function ModelSelectionModal({ 
   isOpen, 
@@ -22,6 +24,12 @@ export default function ModelSelectionModal({
   const [customModel, setCustomModel] = useState('');
   const [pullProgress, setPullProgress] = useState<{status: string, completed?: number, total?: number} | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // ASR/Whisper model state
+  const [asrModels, setAsrModels] = useState<string[]>([]);
+  const [allAsrModels, setAllAsrModels] = useState<string[]>([]);
+  const [currentAsrModel, setCurrentAsrModel] = useState('');
+  const [asrLoading, setAsrLoading] = useState(false);
 
   const cancelDownload = () => {
     if (abortControllerRef.current) {
@@ -44,17 +52,22 @@ export default function ModelSelectionModal({
   const fetchModels = async () => {
     try {
       setLoading(true);
-      const [modelsRes, trendingRes] = await Promise.all([
+      const [modelsRes, trendingRes, whisperRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/models`),
-        fetch(`${API_BASE_URL}/api/trending-models`)
+        fetch(`${API_BASE_URL}/api/trending-models`),
+        fetch(`${API_BASE_URL}/api/whisper/models`)
       ]);
       const modelsData = await modelsRes.json();
       const trendingData = await trendingRes.json();
+      const whisperData = await whisperRes.json();
       
       setModels(modelsData.models || []);
       setCategorizedModels(modelsData.categorized_models || {});
       setCurrentModel(modelsData.current_model || '');
       setPopularModels(trendingData.popular || []);
+      setAsrModels(whisperData.models || []);
+      setAllAsrModels(whisperData.all_models || []);
+      setCurrentAsrModel(whisperData.current_model || '');
     } catch {
       setError('Failed to fetch available models.');
     } finally {
@@ -213,6 +226,75 @@ export default function ModelSelectionModal({
     return 'LLM'; // default fallback
   };
 
+  const deleteAsrModel = async (modelName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Delete ${modelName} from cache?`)) return;
+    try {
+      setAsrLoading(true);
+      setError(null);
+      const res = await fetch(`${API_BASE_URL}/api/whisper/models/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model_name: modelName }),
+      });
+      const data = await res.json();
+      if (data.status === 'error') throw new Error(data.message);
+      if (currentAsrModel === modelName) setCurrentAsrModel('');
+      await fetchModels();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete ASR model.';
+      setError(errorMessage);
+    } finally {
+      setAsrLoading(false);
+    }
+  };
+
+  const loadAsrModel = async (modelToLoad: string) => {
+    if (!modelToLoad) return;
+    
+    if (currentAsrModel === modelToLoad) {
+      try {
+        setAsrLoading(true);
+        const res = await fetch(`${API_BASE_URL}/api/whisper/models/unload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (data.status === 'error') {
+          throw new Error(data.message);
+        }
+        setCurrentAsrModel('');
+        await fetchModels();
+        return;
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to unload ASR model.';
+        setError(errorMessage);
+        setAsrLoading(false);
+        return;
+      }
+    }
+    
+    try {
+      setAsrLoading(true);
+      setError(null);
+      const res = await fetch(`${API_BASE_URL}/api/whisper/models/load`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model_name: modelToLoad }),
+      });
+      const data = await res.json();
+      if (data.status === 'error') {
+        throw new Error(data.message);
+      }
+      setCurrentAsrModel(modelToLoad);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load ASR model.';
+      setError(errorMessage);
+    } finally {
+      setAsrLoading(false);
+    }
+  };
+
   const currentCategory = getCategoryForModel(currentModel);
 
   if (!isOpen) return null;
@@ -227,7 +309,7 @@ export default function ModelSelectionModal({
             <h2 className="text-xl font-semibold text-foreground tracking-tight">
               Manage Models
             </h2>
-            <p className="text-sm font-medium text-muted/80 mt-1">Select or pull Ollama models for local inference.</p>
+            <p className="text-sm font-medium text-muted/80 mt-1">Select or pull Ollama and Whisper models for local inference.</p>
           </div>
           <button 
             onClick={onClose}
@@ -295,7 +377,7 @@ export default function ModelSelectionModal({
               {[
                 { type: "LLM", model: currentCategory === "LLM" ? currentModel : null, icon: <Cpu size={20} /> },
                 { type: "OCR model", model: currentCategory === "OCR model" ? currentModel : null, icon: <Cpu size={20} /> },
-                { type: "Audio", model: currentCategory === "Audio" ? currentModel : null, icon: <Cpu size={20} /> },
+                { type: "ASR (Whisper)", model: currentAsrModel || null, icon: <Mic size={20} /> },
                 { type: "Embedding model", model: currentCategory === "Embedding model" ? currentModel : null, icon: <Cpu size={20} /> },
                 { type: "Other", model: currentCategory === "Other" ? currentModel : null, icon: <Cpu size={20} /> }
               ].map((item, idx) => (
@@ -318,6 +400,79 @@ export default function ModelSelectionModal({
                   )}
                 </div>
               ))}
+            </div>
+          </section>
+
+          <hr className="border-panel-border/40" />
+
+          {/* ASR/Whisper Models */}
+          <section className="flex flex-col gap-5">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">ASR Models (Whisper)</h3>
+              <p className="text-sm font-medium text-muted/80">Speech-to-text models for audio transcription.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {(allAsrModels.length > 0 ? allAsrModels : WHISPER_MODELS).map((model) => {
+                const isActive = currentAsrModel === model;
+                const isInstalled = asrModels.includes(model);
+                const isLoadingThis = asrLoading;
+
+                return (
+                  <div key={model} className={`flex items-center p-3 gap-3 rounded-xl border transition-all shadow-sm group/item ${
+                    isActive
+                      ? 'border-primary/80 bg-accent/60'
+                      : 'border-panel-border bg-background/50 hover:bg-accent/40'
+                  } ${asrLoading ? 'opacity-70 pointer-events-none' : ''}`}>
+                    <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                      <Mic size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0" onClick={() => loadAsrModel(model)}>
+                      <span className="block text-sm font-semibold text-foreground/90 truncate cursor-pointer">
+                        {model}
+                      </span>
+                      {!isActive && isInstalled && (
+                        <span className="text-[10px] font-bold text-green-400">Installed</span>
+                      )}
+                    </div>
+
+                    {isLoadingThis ? (
+                      <RefreshCcw size={14} className="text-primary animate-spin shrink-0" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {isActive ? (
+                          <div
+                            className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wide cursor-pointer hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 group/active"
+                            onClick={(e) => { e.stopPropagation(); loadAsrModel(model); }}
+                            title="Click to unload"
+                          >
+                            <span className="group-hover/active:hidden">Active</span>
+                            <span className="hidden group-hover/active:inline">Unload</span>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-xs text-muted/50 font-semibold opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap cursor-pointer"
+                            onClick={() => loadAsrModel(model)}
+                          >
+                            {isInstalled ? 'Click to load' : 'Click to download'}
+                          </span>
+                        )}
+                        {(isInstalled || isActive) && (
+                          <button
+                            onClick={(e) => deleteAsrModel(model, e)}
+                            className={`p-1.5 text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-md transition-all z-10 ${
+                              isActive ? 'opacity-100' : 'opacity-0 group-hover/item:opacity-100'
+                            }`}
+                            title="Delete from cache"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
 

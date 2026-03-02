@@ -32,7 +32,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         
         {/* Modal Content */}
         <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col gap-8 no-scrollbar">
-          
           {/* Infrastructure Selection */}
           <section className="flex flex-col gap-6">
             <div>

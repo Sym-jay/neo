@@ -7,7 +7,7 @@ import Sidebar from "./components/Sidebar";
 import InputArea from "./components/InputArea";
 import SettingsModal from "./components/SettingsModal";
 import ChatArea from "./components/ChatArea";
-import ModelSelectionModal from "@/backend/ModelSelectionModal";
+import ModelSelectionModal from "@/app/components/ModelSelectionModal";
 
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,9 +17,11 @@ export default function Home() {
 
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState("Loading...");
+  const [selectedAsrModel, setSelectedAsrModel] = useState("Loading...");
   const [models, setModels] = useState<string[]>([]);
+  const [asrModels, setAsrModels] = useState<string[]>([]);
   const [categorizedModels, setCategorizedModels] = useState<Record<string, string[]>>({});
-  const [dropdownPane, setDropdownPane] = useState<"LLM" | "OCR model" | "Audio" | "Embedding model" | "Other">("LLM");
+  const [dropdownPane, setDropdownPane] = useState<"LLM" | "OCR model" | "ASR" | "Embedding model" | "Other">("LLM");
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [activeTabStyle, setActiveTabStyle] = useState({ left: 0, width: 0 });
@@ -28,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     if (isModelDropdownOpen) {
       setTimeout(() => {
-        const activeIndex = ["LLM", "OCR model", "Audio", "Embedding model", "Other"].indexOf(dropdownPane);
+        const activeIndex = ["LLM", "OCR model", "ASR", "Embedding model", "Other"].indexOf(dropdownPane);
         const activeElement = tabsRef.current[activeIndex];
         if (activeElement) {
           setActiveTabStyle({
@@ -42,18 +44,32 @@ export default function Home() {
 
   const fetchModels = React.useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/models');
-      const data = await res.json();
+      const [modelsRes, asrRes] = await Promise.all([
+        fetch('http://localhost:8000/api/models'),
+        fetch('http://localhost:8000/api/whisper/models')
+      ]);
+      const data = await modelsRes.json();
+      const asrData = await asrRes.json();
+      
       setModels(data.models || []);
       setCategorizedModels(data.categorized_models || {});
+      setAsrModels(asrData.models || []);
+      
       if (data.current_model) {
         setSelectedModel(data.current_model);
       } else {
         setSelectedModel("No models loaded");
       }
+      
+      if (asrData.current_model) {
+        setSelectedAsrModel(asrData.current_model);
+      } else {
+        setSelectedAsrModel("No ASR model loaded");
+      }
     } catch (err) {
       console.error("Failed to fetch models:", err);
       setSelectedModel("Error loading models");
+      setSelectedAsrModel("Error loading ASR");
     }
   }, []);
 
@@ -97,20 +113,20 @@ export default function Home() {
               onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
               className="flex items-center gap-2 text-sm text-foreground/80 px-4 py-1.5 bg-panel/40 rounded-full border border-panel-border hover:bg-panel/80 hover:border-panel-border/80 backdrop-blur-2xl shadow-sm tracking-wide transition-all"
             >
-              <span className="font-bold">Neo</span>
-              <span className="text-panel-border">|</span>
-              <span className="font-medium">{selectedModel}</span>
+              <span className="font-medium">
+                {dropdownPane === "ASR" ? selectedAsrModel : selectedModel}
+              </span>
               <ChevronDown size={14} className={`text-muted transition-transform duration-200 ${isModelDropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {isModelDropdownOpen && (
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-[500px] bg-panel border border-panel-border rounded-xl shadow-2xl py-2 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute top-full mt-5 left-1/2 -translate-x-1/2 w-[500px] bg-panel border border-panel-border rounded-xl shadow-2xl py-3 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="relative flex p-1.5 mx-2 mb-2 rounded-xl overflow-x-auto no-scrollbar">
                   <div
                     className="absolute top-1.5 bottom-1.5 bg-panel border border-panel-border/80 rounded-lg shadow-sm transition-all duration-300 ease-out"
                     style={{ left: activeTabStyle.left, width: activeTabStyle.width }}
                   />
-                  {["LLM", "OCR model", "Audio", "Embedding model", "Other"].map((pane, idx) => (
+                  {["LLM", "OCR model", "ASR", "Embedding model", "Other"].map((pane, idx) => (
                     <button
                       key={pane}
                       ref={(el) => {
@@ -132,38 +148,72 @@ export default function Home() {
                 </div>
                 
                 <div className="max-h-60 overflow-y-auto mt-1">
-                  {(categorizedModels[dropdownPane] || []).map((model) => (
-                    <button
-                      key={model}
-                      onClick={async () => {
-                        setSelectedModel("Loading...");
-                        setIsModelDropdownOpen(false);
-                        try {
-                          const res = await fetch("http://localhost:8000/api/models/load", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ model_name: model }),
-                          });
-                          const data = await res.json();
-                          if (data.status === "success") {
-                            setSelectedModel(model);
-                          } else {
+                  {dropdownPane === "ASR" ? (
+                    asrModels.map((model) => (
+                      <button
+                        key={model}
+                        onClick={async () => {
+                          setSelectedAsrModel("Loading...");
+                          setIsModelDropdownOpen(false);
+                          try {
+                            const res = await fetch("http://localhost:8000/api/whisper/models/load", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ model_name: model }),
+                            });
+                            const data = await res.json();
+                            if (data.status === "success" || data.status === "downloading") {
+                              setSelectedAsrModel(model);
+                            } else {
+                              setSelectedAsrModel("Error");
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            setSelectedAsrModel("Error");
+                          }
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent/10 flex items-center justify-between group transition-colors"
+                      >
+                        <span className={selectedAsrModel === model ? "text-foreground font-medium" : "text-muted group-hover:text-foreground"}>
+                          {model}
+                        </span>
+                        {selectedAsrModel === model && <Check size={14} className="text-foreground" />}
+                      </button>
+                    ))
+                  ) : (
+                    (categorizedModels[dropdownPane] || []).map((model) => (
+                      <button
+                        key={model}
+                        onClick={async () => {
+                          setSelectedModel("Loading...");
+                          setIsModelDropdownOpen(false);
+                          try {
+                            const res = await fetch("http://localhost:8000/api/models/load", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ model_name: model }),
+                            });
+                            const data = await res.json();
+                            if (data.status === "success") {
+                              setSelectedModel(model);
+                            } else {
+                              setSelectedModel("Error");
+                            }
+                          } catch (err) {
+                            console.error(err);
                             setSelectedModel("Error");
                           }
-                        } catch (err) {
-                          console.error(err);
-                          setSelectedModel("Error");
-                        }
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent/10 flex items-center justify-between group transition-colors"
-                    >
-                      <span className={selectedModel === model ? "text-foreground font-medium" : "text-muted group-hover:text-foreground"}>
-                        {model}
-                      </span>
-                      {selectedModel === model && <Check size={14} className="text-foreground" />}
-                    </button>
-                  ))}
-                  {(categorizedModels[dropdownPane] || []).length === 0 && (
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent/10 flex items-center justify-between group transition-colors"
+                      >
+                        <span className={selectedModel === model ? "text-foreground font-medium" : "text-muted group-hover:text-foreground"}>
+                          {model}
+                        </span>
+                        {selectedModel === model && <Check size={14} className="text-foreground" />}
+                      </button>
+                    ))
+                  )}
+                  {(dropdownPane === "ASR" ? asrModels : categorizedModels[dropdownPane] || []).length === 0 && (
                     <div className="px-4 py-3 text-xs text-muted text-center">
                       No models available for {dropdownPane}
                     </div>

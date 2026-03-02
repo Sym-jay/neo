@@ -1,7 +1,9 @@
+from typing import Optional
+
 import ollama
 
 class LLMInference:
-    def __init__(self, llm_name: str | None = None):
+    def __init__(self, llm_name: Optional[str] = None):
         self.llm_name = None
         if llm_name is not None:
             self.load_model(llm_name)
@@ -20,7 +22,6 @@ class LLMInference:
         print(f"Model '{self.llm_name}' ready.")
 
     def categorize_model(self, model_info):
-        """Helper to return the category of a model: 'LLM', 'Embedding model', 'OCR model', 'Audio', or 'Other'."""
         model_name = ""
         if isinstance(model_info, dict):
             model_name = model_info.get('model', model_info.get('name', ''))
@@ -59,7 +60,6 @@ class LLMInference:
                 if family_lower == 'whisper':
                     return 'Audio'
                     
-        # By default, treat as LLM if it has common LLM keywords or no specific tag
         if any(kw in model_name_lower for kw in ['llama', 'mistral', 'gemma', 'phi', 'qwen', 'coder', 'deepseek']):
             return 'LLM'
             

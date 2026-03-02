@@ -8,7 +8,6 @@ class DocumentIngestor:
         self.ocr_model = ocr_model
 
     def perform_ocr(self, image_path: str) -> str:
-        # Check if running on GPU (CUDA or Apple Silicon MPS)
         if torch.cuda.is_available():
             try:
                 response = ollama.generate(
