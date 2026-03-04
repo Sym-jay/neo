@@ -52,6 +52,41 @@ class VectorStore:
         self._save()
         print(f"Added {len(documents)} embeddings. Total vectors: {self.index.ntotal}")
 
+    def has_source(self, filename: str) -> bool:
+        """Return True if any vector in the store was ingested from *filename*."""
+        return any(m.get("source") == filename for m in self.metadata)
+
+    def remove_source(self, filename: str) -> int:
+        """
+        Remove all vectors associated with *filename* and rebuild the index.
+        Returns the number of vectors removed.
+        """
+        keep = [m for m in self.metadata if m.get("source") != filename]
+        removed = len(self.metadata) - len(keep)
+        if removed == 0:
+            return 0
+
+        # Rebuild FAISS index from the surviving vectors
+        all_vectors = faiss.rev_swig_ptr(
+            self.index.get_xb(), self.index.ntotal * self.index.d
+        ).reshape(self.index.ntotal, self.index.d).copy()
+
+        keep_indices = [m["index"] for m in keep]
+        new_index = faiss.IndexFlatL2(self.dimension)
+        if keep_indices:
+            new_vectors = all_vectors[keep_indices]
+            new_index.add(new_vectors.astype(np.float32))
+
+        # Re-number metadata indices to match the new FAISS positions
+        for i, m in enumerate(keep):
+            m["index"] = i
+
+        self.index = new_index
+        self.metadata = keep
+        self._save()
+        print(f"Removed {removed} vector(s) for source '{filename}'. Total vectors: {self.index.ntotal}")
+        return removed
+
     def search(self, query_embedding: np.ndarray, k: int = 5) -> List[Dict]:
         if self.index.ntotal == 0:
             return []
